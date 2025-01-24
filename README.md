@@ -1,2 +1,2 @@
-# Inspect-Wireframe
-This is my first OpenGL project using GLFW, and its primary goal is to explore and inspect the wireframe representations of 3D objects. By focusing on wireframe visualization, this project serves as a foundation for understanding OpenGL rendering techniques and gaining hands-on experience with graphical programming concepts.
+# Wireframe Landscape Visualizer
+A minimalist yet functional landscape visualizer that renders a dynamic 3D terrain using wireframes. The visualization avoids textures and unnecessary graphical elements, focusing purely on clean, geometric wireframe aesthetics. The landscape changes dynamically, offering smooth animations to simulate natural terrain features like hills, valleys, and plateaus. This project is ideal for showcasing terrain modeling or creating a visually engaging backdrop without the distraction of surface details.
