@@ -1,6 +1,5 @@
 #include <SDL2/SDL.h>
-#include <iostream>
-#include <vector>
+#include <stdio.h>
 #include <math.h>
 
 #define WIDTH 800
@@ -20,18 +19,12 @@ typedef struct
 
 typedef struct
 {
-	std::vector<triangle> tris;
-} mesh;
-
-typedef struct
-{
 	float m[4][4];
 } mat4x4;
 
 void process_event(SDL_Event *event, int *running);
 
-void multiplyMaxtrixVector(vec3 &i, vec3 &o, mat4x4 &m);
-
+void AID_DrawTriangle(SDL_Surface *surface, triangle *tri, uint32_t color);
 typedef struct
 {
     int start_x;
@@ -55,6 +48,7 @@ void AID_PutPixel(SDL_Surface *surface, int x, int y, uint32_t color)
 	if (SDL_MUSTLOCK(surface))
 		SDL_UnlockSurface(surface);
 }
+
 void AID_DrawLine(SDL_Surface *surface, AID_Line *line, uint32_t color)
 {
     if (SDL_MUSTLOCK(surface))
@@ -133,46 +127,6 @@ int main()
 		return (-1);
 	}
 
-	mesh cube;
-	
-	triangle tmp = {{{0, 0, 0}, {0, 1, 0}, {1, 1, 0}}};
-	cube.tris.push_back(tmp);
-	tmp = {{{0, 0, 0}, {1, 1, 0}, {1, 0, 0}}};
-	cube.tris.push_back(tmp);
-	tmp = {{{0, 0, 0}, {0, 0, 1}, {0, 1, 1}}};
-	cube.tris.push_back(tmp);
-	tmp = {{{0, 0, 0}, {0, 1, 1}, {0, 1, 0}}};
-	cube.tris.push_back(tmp);
-	tmp = {{{0, 0, 0}, {0, 0, 1}, {1, 0, 1}}};
-	cube.tris.push_back(tmp);
-	tmp = {{{0, 0, 0}, {1, 0, 1}, {1, 0, 0}}};
-	cube.tris.push_back(tmp);
-	tmp = {{{1, 1, 1}, {1, 0, 1}, {0, 0, 1}}};
-	cube.tris.push_back(tmp);
-	tmp = {{{1, 1, 1}, {0, 0, 1}, {0, 1, 1}}};
-	cube.tris.push_back(tmp);
-	tmp = {{{1, 1, 1}, {0, 1, 1}, {0, 1, 0}}};
-	cube.tris.push_back(tmp);
-	tmp = {{{1, 1, 1}, {0, 1, 0}, {1, 1, 0}}};
-	cube.tris.push_back(tmp);
-	tmp = {{{1, 1, 1}, {1, 1, 0}, {1, 0, 0}}};
-	cube.tris.push_back(tmp);
-	tmp = {{{1, 1, 1}, {1, 0, 0}, {1, 0, 1}}};
-	cube.tris.push_back(tmp);
-
-	float fNear = 0.1f;
-	float fFar = 1000.0f;
-	float fFov = 90.0f;
-	float fAspectRatio = (float)HEIGHT / (float)WIDTH;
-	float fFovRad = 1.0f / tanf(fFov * 0.5f / 180.0f * 3.14159f);
-	mat4x4 matProj;
-	matProj.m[0][0] = fAspectRatio * fFovRad;
-	matProj.m[1][1] = fFovRad;
-	matProj.m[2][2] = fFar / (fFar - fNear);
-	matProj.m[3][2] = (-fFar * fNear) / (fFar - fNear);
-	matProj.m[2][3] = 1.0f;
-	matProj.m[3][3] = 0.0f;
-
 	SDL_Event event;
 	int running = 1;
 	while (running)
@@ -180,8 +134,6 @@ int main()
 		while (SDL_PollEvent(&event))
 			process_event(&event, &running);
 		AID_PutRectangle(screen, 0, 0, WIDTH, HEIGHT, 0xFF000000);
-		AID_Line line = {0, 0, 100, 100, 1.0};
-		AID_DrawLine(screen, &line, 0xFFFFFFFF);
 		SDL_UpdateWindowSurface(window);
 		SDL_Delay(10);
 	}
@@ -190,17 +142,17 @@ int main()
 	return (0);
 }
 
-void multiplyMaxtrixVector(vec3 &i, vec3 &o, mat4x4 &m)
+void AID_DrawTriangle(SDL_Surface *surface, triangle *tri, uint32_t color)
 {
-	o.x = i.x * m.m[0][0] + i.y * m.m[1][0] + i.z * m.m[2][0] + m.m[3][0];
-	o.y = i.x * m.m[0][1] + i.y * m.m[1][1] + i.z * m.m[2][1] + m.m[3][1];
-	o.z = i.x * m.m[0][2] + i.y * m.m[1][2] + i.z * m.m[2][2] + m.m[3][2];
-	float w = i.x * m.m[0][3] + i.y * m.m[1][3] + i.z * m.m[2][3] + m.m[3][3];
-	if (w != 0.0f)
+	AID_Line line;
+	line.thickness = 1.0;
+	for (int i = 0; i < 3; i++)
 	{
-		o.x /= w;
-		o.y /= w;
-		o.z /= w;
+		line.start_x = (int)tri->vertices[i].x;
+		line.start_y = (int)tri->vertices[i].y;
+		line.end_x = (int)tri->vertices[(i + 1) % 3].x;
+		line.end_y = (int)tri->vertices[(i + 1) % 3].y;
+		AID_DrawLine(surface, &line, color);
 	}
 }
 
